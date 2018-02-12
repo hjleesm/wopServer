@@ -43,10 +43,15 @@ module.exports = function(app, Bible)
 
     // UPDATE TAG
     app.put('/api/bibles/:book_id/:chapter_id/:verse_id', function(req, res){
-        Bible.update({book: req.params.book_id, chapter: req.params.chapter_id, verse:req.params.verse_id}, { $set: req.body }, function(err, output){
-            if(err) res.status(500).json({ error: 'database failure' });
-            console.log(output);
-            if(!output.n) return res.status(404).json({ error: 'bible not found' });
+        Bible.find({book: req.params.book_id, chapter: req.params.chapter_id, verse:req.params.verse_id}, function(err, bible){
+            if(err) return res.status(500).json({error: err});
+            if(!bible) return res.status(404).json({error: 'bible not found'});
+
+            bible.tag = [];
+            for( const t of req.body.tag) {
+                bible.push(t);
+            }
+
             res.setHeader('Access-Control-Allow-Origin','*');
             res.json( { message: 'bible\'s tag updated' } );
         })
