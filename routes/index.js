@@ -49,7 +49,7 @@ module.exports = function(app, Bible)
 
             bible.tag = [];
             for( const t of req.body.tag) {
-                bible.push(t);
+                bible.tag.push(t);
             }
 
             res.setHeader('Access-Control-Allow-Origin','*');
