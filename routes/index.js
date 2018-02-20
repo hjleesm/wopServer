@@ -1,6 +1,6 @@
 // routes/index.js
 
-module.exports = function(app, Bible)
+module.exports = function(app, Bible, Account)
 {
     // GET ALL BIBLES
     app.get('/api/bibles', function(req,res){
@@ -95,6 +95,25 @@ module.exports = function(app, Bible)
             }
             res.setHeader('Access-Control-Allow-Origin','*');
             res.json(words);
+        });
+    });
+
+    // Create Account
+    app.post('/api/account/create', function(req, res){
+        var account = new Account();
+        account.id = req.body.id;
+        account.password = req.body.password;
+        account.email = req.body.email;
+        account.score = 0;
+
+        account.save(function(err){
+            if(err){
+                console.error(err);
+                res.json({result: 0});
+                return;
+            }
+    
+            res.json({result: 1});
         });
     });
 

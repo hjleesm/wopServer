@@ -27,12 +27,13 @@ mongoose.connect('mongodb://localhost/wop');
 
 // DEFINE MODEL
 var Bible = require('./models/bible');
+var Account = require('./models/account')
 
 // [CONFIGURE SERVER PORT]
 var port = process.env.PORT || 8080;
 
 // [CONFIGURE ROUTER]
-var router = require('./routes')(app, Bible)
+var router = require('./routes')(app, Bible, Account)
 
 // [RUN SERVER]
 var server = app.listen(port, function(){
