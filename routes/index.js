@@ -43,7 +43,6 @@ module.exports = function(app, Bible, Account)
 
     // UPDATE TAG
     app.put('/api/bibles/:book_id/:chapter_id/:verse_id', function(req, res){
-		console.log('!!!');
         Bible.update({book: req.params.book_id, chapter: req.params.chapter_id, verse:req.params.verse_id}, { $set: req.body }, function(err, output){
             if(err) res.status(500).json({ error: 'database failure' });
             console.log(output);
