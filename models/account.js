@@ -6,7 +6,7 @@ var accountSchema = new Schema({
     id: String,
     password: String,
     email: String,
-    score: number
+    score: Number
 }, { collection: 'account' });
 
 module.exports = mongoose.model('account', accountSchema);
