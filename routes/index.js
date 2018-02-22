@@ -120,11 +120,12 @@ module.exports = function(app, Bible, Account)
     app.get('/api/account/exist/:id', function(req, res){
         Account.find({id: req.params.id}, function(err, account){
             if(err) return res.status(500).json({error: err});
-            
+            if(!account) return res.status(404).json({error: 'account not found'});
+
             res.setHeader('Access-Control-Allow-Origin','*');
-            if(account) 
+            if(account.length > 0)
                 res.json({exist: true});
-            else
+            else 
                 res.json({exist: false});
         })
     });
