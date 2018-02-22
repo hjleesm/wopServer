@@ -116,6 +116,19 @@ module.exports = function(app, Bible, Account)
         });
     });
 
+    // Check id
+    app.get('/api/account/exist/:id', function(req, res){
+        Account.find({id: req.params.id}, function(err, account){
+            if(err) return res.status(500).json({error: err});
+            
+            res.setHeader('Access-Control-Allow-Origin','*');
+            if(account) 
+                res.json({exist: true});
+            else
+                res.json({exist: false});
+        })
+    });
+
     // // GET BOOK BY AUTHOR
     // app.get('/api/books/author/:author', function(req, res){
     //     res.end();
