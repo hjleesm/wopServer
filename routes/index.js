@@ -99,20 +99,33 @@ module.exports = function(app, Bible, Account)
 
     // Create Account
     app.post('/api/account/create', function(req, res){
-        var account = new Account();
-        account.id = req.body.id;
-        account.password = req.body.password;
-        account.email = req.body.email;
-        account.score = 0;
+        Account.find({id: req.body.id}, function(err, account){
+            if(err) return res.status(500).json({error: err});
+            if(!account) return res.status(404).json({error: 'account not found'});
 
-        account.save(function(err){
-            if(err){
-                console.error(err);
-                res.json({result: 0});
-                return;
+            res.setHeader('Access-Control-Allow-Origin','*');
+            if(account.length > 0) {
+                res.json({
+                    result: 0,
+                    msg: 'This account is submitted!'
+                });
+            } else { 
+                var account = new Account();
+                account.id = req.body.id;
+                account.password = req.body.password;
+                account.email = req.body.email;
+                account.score = 0;
+        
+                account.save(function(err){
+                    if(err){
+                        console.error(err);
+                        res.json({result: 0});
+                        return;
+                    }
+            
+                    res.json({result: 1});
+                });
             }
-    
-            res.json({result: 1});
         });
     });
 
