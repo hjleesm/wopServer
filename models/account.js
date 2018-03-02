@@ -18,4 +18,12 @@ accountSchema.pre('save', function(next) {
     return next();
 });
 
+accountSchema.methods.authenticate = function(password, callback) {
+    if(bcrypt.compareSync(password, this.password)) {
+        callback(null, true);
+    } else {
+        callback('error');
+    }
+};
+
 module.exports = mongoose.model('account', accountSchema);

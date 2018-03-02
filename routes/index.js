@@ -1,4 +1,6 @@
 // routes/index.js
+var passport        = require('passport');
+var LocalStrategy   = require('passport-local').Strategy;
 
 module.exports = function(app, Bible, Account)
 {
@@ -127,6 +129,11 @@ module.exports = function(app, Bible, Account)
                 });
             }
         });
+    });
+
+    // login
+    app.post('/api/account/login', function(req, res){
+    
     });
 
     // Check id
