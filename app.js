@@ -8,7 +8,7 @@ var bodyParser      = require('body-parser');
 var mongoose        = require('mongoose');
 var cors 		    = require('cors');
 var passport        = require('passport');
-var passportConfig  = require('./passport');
+var passportConfig  = require('./module/passport');
 
 // [CONFIGURE APP TO USE bodyParser]
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -27,16 +27,14 @@ db.once('open', function(){
 
 mongoose.connect('mongodb://localhost/wop');
 
-//PASSPORT
-app.use(passport.initialize());
-app.use(passport.session());
-passportConfig();
-
 // DEFINE MODEL
 var Bible = require('./models/bible');
 var Account = require('./models/account');
 
-var _passport = require('./module/passport')(Account);
+//PASSPORT
+app.use(passport.initialize());
+app.use(passport.session());
+passportConfig(Account);
 
 // [CONFIGURE SERVER PORT]
 var port = process.env.PORT || 8080;
