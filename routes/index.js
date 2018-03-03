@@ -157,12 +157,12 @@ module.exports = function(app, Bible, Account)
     };
 
     // check session
-    app.get('/auth', isAuthenticated, function (req, res) {
+    app.get('/api/auth', isAuthenticated, function (req, res) {
         res.json(req.user.id);
     });
 
     // logout
-    app.delete('/auth', function (req, res) {
+    app.delete('/api/auth', function (req, res) {
         req.logout();
     });
 
