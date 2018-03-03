@@ -132,10 +132,8 @@ module.exports = function(app, Bible, Account)
     });
 
     // login
-    app.post('/api/account/login', passport.authenticate('local', {
-        failureRedirect: '/'
-    }), function(req, res) {
-        res.redirect('/');
+    app.post('/api/account/login', passport.authenticate('local'), function(req, res) {
+        res.send(200);
     });
 
     // Check id
