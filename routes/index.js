@@ -130,24 +130,40 @@ module.exports = function(app, Bible, Account)
             }
         });
     });
-
-    // login
-    app.post('/api/account/login', passport.authenticate('local'), function(req, res) {
-        res.send(200);
-    });
-
+    
     // Check id
     app.get('/api/account/exist/:id', function(req, res){
         Account.find({id: req.params.id}, function(err, account){
             if(err) return res.status(500).json({error: err});
             if(!account) return res.status(404).json({error: 'account not found'});
-
+            
             res.setHeader('Access-Control-Allow-Origin','*');
             if(account.length > 0)
-                res.json({exist: true});
+            res.json({exist: true});
             else 
-                res.json({exist: false});
+            res.json({exist: false});
         })
+    });
+    
+    // login
+    app.post('/api/auth', passport.authenticate('local'), function(req, res) {
+        res.send(200);
+    });
+
+    var isAuthenticated = function (req, res, next) {
+        if (req.isAuthenticated())
+            return next();
+        res.send(401);
+    };
+
+    // check session
+    app.get('/auth', isAuthenticated, function (req, res) {
+        res.json(req.user.id);
+    });
+
+    // logout
+    app.delete('/auth', function (req, res) {
+        req.logout();
     });
 
     // // GET BOOK BY AUTHOR
