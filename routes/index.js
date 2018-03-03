@@ -147,13 +147,13 @@ module.exports = function(app, Bible, Account)
     
     // login
     app.post('/api/auth', passport.authenticate('local'), function(req, res) {
-        res.send(200);
+        res.sendStatus(200);
     });
 
     var isAuthenticated = function (req, res, next) {
         if (req.isAuthenticated())
             return next();
-        res.send(401);
+        res.sendStatus(401);
     };
 
     // check session
