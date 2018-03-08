@@ -8,7 +8,10 @@ var bodyParser      = require('body-parser');
 var mongoose        = require('mongoose');
 var cors 		    = require('cors');
 var passport        = require('passport');
-var passportConfig  = require('./module/passport');
+var session			= require('express-session');
+var cookieSession 	= require('cookie-session');
+var flash 			= require('connect-flash');
+var path 			= require('path');
 
 // [CONFIGURE APP TO USE bodyParser]
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -31,16 +34,26 @@ mongoose.connect('mongodb://localhost/wop');
 var Bible = require('./models/bible');
 var Account = require('./models/account');
 
+// Session
+app.use(cookieSession({
+  keys: ['wop'],
+  cookie: {
+    maxAge: 1000 * 60 * 60 // 유효기간 1시간
+  }
+}));
+app.use(flash());
+
 //PASSPORT
 app.use(passport.initialize());
 app.use(passport.session());
-passportConfig(Account);
 
 // [CONFIGURE SERVER PORT]
 var port = process.env.PORT || 8080;
 
 // [CONFIGURE ROUTER]
-var router = require('./routes')(app, Bible, Account);
+app.use(express.static(path.join(__dirname, 'wop')));
+
+var router = require('./routes')(app, Bible, Account, passport);
 
 // [RUN SERVER]
 var server = app.listen(port, function(){

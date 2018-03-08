@@ -1,9 +1,43 @@
 // routes/index.js
-var passport        = require('passport');
-var LocalStrategy   = require('passport-local').Strategy;
+var passport = require('passport')
+  , LocalStrategy = require('passport-local').Strategy;
+var path = require('path');
+var express         = require('express');
 
-module.exports = function(app, Bible, Account)
+module.exports = function(app, Bible, Account, passport)
 {
+	var wopPath = path.resolve(__dirname + '/wop/');
+	
+	app.use('/wop', express.static(wopPath));
+	
+	passport.serializeUser(function(account, done) {
+		done(null, account);
+    });
+
+    passport.deserializeUser(function(account, done) {
+		done(null, account);
+    });
+
+    passport.use(new LocalStrategy({
+        usernameField: 'id',
+        passwordField: 'pw',
+        session: true,
+        passReqToCallback: true 
+    }, function(req, id, password, done) {
+        Account.findOne({id: id}, function(err, account) {
+            if(err) return done(err);
+            if(!account) return done(null, false, { msg: 'not found id '});
+
+            return account.authenticate(password, function(passError, isSuccess) {
+                if(isSuccess) {
+                    return done(null, account);
+                } else {
+                    return done(null, false, { msg: 'password is incorrect' });
+                }
+            })
+        })
+    }));
+	
     // GET ALL BIBLES
     app.get('/api/bibles', function(req,res){
         Bible.find(function(err, bible){
@@ -47,7 +81,6 @@ module.exports = function(app, Bible, Account)
     app.put('/api/bibles/:book_id/:chapter_id/:verse_id', function(req, res){
         Bible.update({book: req.params.book_id, chapter: req.params.chapter_id, verse:req.params.verse_id}, { $set: req.body }, function(err, output){
             if(err) res.status(500).json({ error: 'database failure' });
-            console.log(output);
             if(!output.n) return res.status(404).json({ error: 'bible not found' });
 			
 			res.setHeader('Access-Control-Allow-Origin','*');
@@ -151,6 +184,10 @@ module.exports = function(app, Bible, Account)
     });
 
     var isAuthenticated = function (req, res, next) {
+		res.header('Access-Control-Allow-Credentials', true);
+		res.header('Access-Control-Allow-Origin','*');
+		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+		
         if (req.isAuthenticated())
             return next();
         res.sendStatus(401);
@@ -158,12 +195,16 @@ module.exports = function(app, Bible, Account)
 
     // check session
     app.get('/api/auth', isAuthenticated, function (req, res) {
-        res.json(req.user.id);
+        res.json({
+			id: req.user.id, 
+			score: req.user.score
+		});
     });
 
     // logout
     app.delete('/api/auth', function (req, res) {
         req.logout();
+		res.send(200);
     });
 
     // // GET BOOK BY AUTHOR
