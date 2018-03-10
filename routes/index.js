@@ -84,9 +84,7 @@ module.exports = function(app, Bible, Account, Tag, passport)
     });
 
     var addedScore = function(id) {
-        console.log('addedScore', id);
         Account.find({id: id}, function(err, account) {
-            console.log('addedScore-0');
             if(!(err || !account)) {
                 account[0].score += 10;
             }
@@ -94,10 +92,8 @@ module.exports = function(app, Bible, Account, Tag, passport)
     };
 
     var writeHistory = function(id, book, chapter, verse, body_tag) {
-        console.log('writeHistory');
         // find bible
         Bible.find({book: book, chapter: chapter, verse: verse}, function(err, bible){
-            console.log('writeHistory-0');
             if(!(err || !bible)) {
                 var removeArray = [];
                 var addArray = JSON.parse(JSON.stringify( body_tag ));
@@ -119,7 +115,6 @@ module.exports = function(app, Bible, Account, Tag, passport)
                 }
 
                 if(removeArray.length > 0 || addArray.length > 0) {
-                    console.log('writeHistory - 1');
                     var saveTag = function(action) {
                         var tag = new Tag();
                         tag.date = new Date();
