@@ -115,14 +115,14 @@ module.exports = function(app, Bible, Account, Tag, passport)
                 }
 
                 if(removeArray.length > 0 || addArray.length > 0) {
-                    var saveTag = function(action) {
+                    var saveTag = function(tagWord, action) {
                         var tag = new Tag();
                         tag.date = new Date();
                         tag.book = book;
                         tag.chapter = chapter;
                         tag.verse = verse;
                         tag.id = id;
-                        tag.tag = removeArray[i];
+                        tag.tag = tagWord;
                         tag.action = action;
 
                         tag.save(function(err){
@@ -134,11 +134,11 @@ module.exports = function(app, Bible, Account, Tag, passport)
                     };
 
                     for (var i = 0; i < removeArray.length; i++) {
-                        saveTag('removed');
+                        saveTag(removeArray[i], 'removed');
                     }
 
                     for (var i = 0; i < addArray.length; i++) {
-                        saveTag('added');
+                        saveTag(addArray[i], 'added');
                     }
 
                     addedScore(id);
@@ -149,6 +149,7 @@ module.exports = function(app, Bible, Account, Tag, passport)
 
     // UPDATE TAG
     app.put('/api/bibles/:book_id/:chapter_id/:verse_id', isAuthenticated, function(req, res){
+        console.log('UPDATE TAG');
         writeHistory(req.user.id, req.params.book_id, req.params.chapter_id, req.params.verse_id, req.body.tag);
 
         Bible.update({book: req.params.book_id, chapter: req.params.chapter_id, verse:req.params.verse_id}, { $set: req.body }, function(err, output){
