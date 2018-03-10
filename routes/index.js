@@ -84,11 +84,7 @@ module.exports = function(app, Bible, Account, Tag, passport)
     });
 
     var addedScore = function(id) {
-        Account.find({id: id}, function(err, account) {
-            if(!(err || !account)) {
-                account[0].score += 10;
-            }
-        });
+        Account.update({id: id}, { $set: {score: account[0].score + 10} }, function(err, output){ });
     };
 
     var writeHistory = function(id, book, chapter, verse, body_tag) {
