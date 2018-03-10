@@ -33,6 +33,7 @@ mongoose.connect('mongodb://localhost/wop');
 // DEFINE MODEL
 var Bible = require('./models/bible');
 var Account = require('./models/account');
+var Tag = require('./models/tags');
 
 // Session
 app.use(cookieSession({
@@ -53,7 +54,7 @@ var port = process.env.PORT || 8080;
 // [CONFIGURE ROUTER]
 app.use(express.static(path.join(__dirname, 'wop')));
 
-var router = require('./routes')(app, Bible, Account, passport);
+var router = require('./routes')(app, Bible, Account, Tag, passport);
 
 // [RUN SERVER]
 var server = app.listen(port, function(){

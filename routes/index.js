@@ -4,8 +4,14 @@ var passport = require('passport')
 var path = require('path');
 var express         = require('express');
 
-module.exports = function(app, Bible, Account, passport)
+module.exports = function(app, Bible, Account, Tag, passport)
 {
+    var isAuthenticated = function (req, res, next) {
+        if (req.isAuthenticated())
+            return next();
+        res.sendStatus(401);
+    };
+
 	var wopPath = path.resolve(__dirname + '/wop/');
 	
 	app.use('/wop', express.static(wopPath));
@@ -77,8 +83,79 @@ module.exports = function(app, Bible, Account, passport)
         })
     });
 
+    var addedScore = function(id) {
+        console.log('addedScore', id);
+        Account.find({id: id}, function(err, account) {
+            console.log('addedScore-0');
+            if(!(err || !account)) {
+                account[0].score += 10;
+            }
+        });
+    };
+
+    var writeHistory = function(id, book, chapter, verse, body_tag) {
+        console.log('writeHistory');
+        // find bible
+        Bible.find({book: book, chapter: chapter, verse: verse}, function(err, bible){
+            console.log('writeHistory-0');
+            if(!(err || !bible)) {
+                var removeArray = [];
+                var addArray = JSON.parse(JSON.stringify( body_tag ));
+
+                if(bible[0].tag)
+                    removeArray = JSON.parse(JSON.stringify( bible[0].tag ));
+
+                if(removeArray.length !== 0 && addArray.length !== 0) {
+                    for (var i = 0; i < removeArray.length; i++) {
+                        for (var j = 0; j < addArray.length; j++) {
+                            if(removeArray[i] === addArray[j]) {
+                                removeArray.splice(i, 1);
+                                addArray.splice(j, 1);
+                                i--;
+                                j--;
+                            }
+                        }
+                    }
+                }
+
+                if(removeArray.length > 0 || addArray.length > 0) {
+                    console.log('writeHistory - 1');
+                    var saveTag = function(action) {
+                        var tag = new Tag();
+                        tag.date = new Date();
+                        tag.book = book;
+                        tag.chapter = chapter;
+                        tag.verse = verse;
+                        tag.id = id;
+                        tag.tag = removeArray[i];
+                        tag.action = action;
+
+                        tag.save(function(err){
+                            if(err){
+                                console.error(err);
+                                return;
+                            }
+                        });
+                    };
+
+                    for (var i = 0; i < removeArray.length; i++) {
+                        saveTag('removed');
+                    }
+
+                    for (var i = 0; i < addArray.length; i++) {
+                        saveTag('added');
+                    }
+
+                    addedScore(id);
+                }
+            }
+        });
+    };
+
     // UPDATE TAG
-    app.put('/api/bibles/:book_id/:chapter_id/:verse_id', function(req, res){
+    app.put('/api/bibles/:book_id/:chapter_id/:verse_id', isAuthenticated, function(req, res){
+        writeHistory(req.user.id, req.params.book_id, req.params.chapter_id, req.params.verse_id, req.body.tag);
+
         Bible.update({book: req.params.book_id, chapter: req.params.chapter_id, verse:req.params.verse_id}, { $set: req.body }, function(err, output){
             if(err) res.status(500).json({ error: 'database failure' });
             if(!output.n) return res.status(404).json({ error: 'bible not found' });
@@ -183,16 +260,6 @@ module.exports = function(app, Bible, Account, passport)
         res.sendStatus(200);
     });
 
-    var isAuthenticated = function (req, res, next) {
-		res.header('Access-Control-Allow-Credentials', true);
-		res.header('Access-Control-Allow-Origin','*');
-		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-		
-        if (req.isAuthenticated())
-            return next();
-        res.sendStatus(401);
-    };
-
     // check session
     app.get('/api/auth', isAuthenticated, function (req, res) {
         res.json({
@@ -204,7 +271,7 @@ module.exports = function(app, Bible, Account, passport)
     // logout
     app.delete('/api/auth', function (req, res) {
         req.logout();
-		res.send(200);
+		res.sendStatus(200);
     });
 
     // // GET BOOK BY AUTHOR
