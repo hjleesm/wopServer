@@ -149,7 +149,6 @@ module.exports = function(app, Bible, Account, Tag, passport)
 
     // UPDATE TAG
     app.put('/api/bibles/:book_id/:chapter_id/:verse_id', isAuthenticated, function(req, res){
-        console.log('UPDATE TAG');
         writeHistory(req.user.id, req.params.book_id, req.params.chapter_id, req.params.verse_id, req.body.tag);
 
         Bible.update({book: req.params.book_id, chapter: req.params.chapter_id, verse:req.params.verse_id}, { $set: req.body }, function(err, output){
@@ -181,12 +180,21 @@ module.exports = function(app, Bible, Account, Tag, passport)
                 });
             }
             res.setHeader('Access-Control-Allow-Origin','*');
+
+            uniqTags.sort(function(a, b) {
+                return b.count - a.count;
+            });
+
+            if (uniqTags.length > 100)
+                uniqTags = uniqTags.slice(0, 100);
+
             res.json(uniqTags);
         });
     });
 
     // GET WORDs have tag
     app.get('/api/words/:tag_name', function(req, res) {
+        console.log('Search: ' + req.params.tag_name);
         Bible.find({tag: {$exists: true, $not: {$size: 0}}}).exec(function(err, bible) {
             var words = [];
             if(bible) {
