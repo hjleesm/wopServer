@@ -53,6 +53,7 @@ var port = process.env.PORT || 8080;
 
 // [CONFIGURE ROUTER]
 app.use(express.static(path.join(__dirname, 'wop')));
+app.use(express.static(path.join(__dirname, 'lotto')));
 
 var router = require('./routes')(app, Bible, Account, Tag, passport);
 
