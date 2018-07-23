@@ -15,9 +15,6 @@ module.exports = function(app, Bible, Account, Tag, passport)
 	var wopPath = path.resolve(__dirname + '/wop/');
 	
     app.use('/wop', express.static(wopPath));
-    
-    // 임시 lotto path
-    app.use('/lotto', express.static(path.resolve(__dirname + '/lotto/')));
 	
 	passport.serializeUser(function(account, done) {
 		done(null, account);
