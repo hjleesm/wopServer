@@ -51,7 +51,6 @@ module.exports = function(app, Bible, Account, Tag, passport)
     app.get('/api/bibles', function(req,res){
         Bible.find(function(err, bible){
             if(err) return res.status(500).send({error: 'database failure'});
-            res.setHeader('Access-Control-Allow-Origin','*');
             res.json(bible);
         });
     });
@@ -71,7 +70,6 @@ module.exports = function(app, Bible, Account, Tag, passport)
         Bible.find({book: req.params.book_id, chapter: req.params.chapter_id}, function(err, bible){
             if(err) return res.status(500).json({error: err});
             if(!bible) return res.status(404).json({error: 'bible not found'});
-            res.setHeader('Access-Control-Allow-Origin','*');
             res.json(bible);
         })
     });
@@ -81,7 +79,6 @@ module.exports = function(app, Bible, Account, Tag, passport)
         Bible.find({book: req.params.book_id, chapter: req.params.chapter_id, verse:req.params.verse_id}, function(err, bible){
             if(err) return res.status(500).json({error: err});
             if(!bible) return res.status(404).json({error: 'bible not found'});
-            res.setHeader('Access-Control-Allow-Origin','*');
             res.json(bible);
         })
     });
@@ -158,7 +155,6 @@ module.exports = function(app, Bible, Account, Tag, passport)
             if(err) res.status(500).json({ error: 'database failure' });
             if(!output.n) return res.status(404).json({ error: 'bible not found' });
 			
-			res.setHeader('Access-Control-Allow-Origin','*');
             res.json( { message: 'bible\'s tag updated' } );
         })
     });
@@ -182,7 +178,6 @@ module.exports = function(app, Bible, Account, Tag, passport)
                     });
                 });
             }
-            res.setHeader('Access-Control-Allow-Origin','*');
 
             uniqTags.sort(function(a, b) {
                 return b.count - a.count;
@@ -211,7 +206,27 @@ module.exports = function(app, Bible, Account, Tag, passport)
                     });
                 });
             }
-            res.setHeader('Access-Control-Allow-Origin','*');
+            res.json(words);
+        });
+    });
+
+    // Search Words
+    app.get('/api/search/:tag_name', function(req, res) {
+        console.log('Search: ' + req.params.tag_name);
+        Bible.find({tag: {$exists: true, $not: {$size: 0}}}).exec(function(err, bible) {
+            var words = [];
+            if(bible) {
+                bible.forEach(function(element) {
+                    element.tag.some(function(tag) {
+                        if(tag.indexOf(req.params.tag_name) >= 0) {
+                            words.push(element);
+
+                            return true;
+                        }
+                    });
+                });
+            }
+
             res.json(words);
         });
     });
@@ -222,7 +237,6 @@ module.exports = function(app, Bible, Account, Tag, passport)
             if(err) return res.status(500).json({error: err});
             if(!account) return res.status(404).json({error: 'account not found'});
 
-            res.setHeader('Access-Control-Allow-Origin','*');
             if(account.length > 0) {
                 res.json({
                     result: 0,
@@ -254,7 +268,6 @@ module.exports = function(app, Bible, Account, Tag, passport)
             if(err) return res.status(500).json({error: err});
             if(!account) return res.status(404).json({error: 'account not found'});
             
-            res.setHeader('Access-Control-Allow-Origin','*');
             if(account.length > 0)
             res.json({exist: true});
             else 
@@ -280,25 +293,4 @@ module.exports = function(app, Bible, Account, Tag, passport)
         req.logout();
 		res.sendStatus(200);
     });
-
-    // // GET BOOK BY AUTHOR
-    // app.get('/api/books/author/:author', function(req, res){
-    //     res.end();
-    // });
-
-    // // CREATE BOOK
-    // app.post('/api/books', function(req, res){
-    //     res.end();
-    // });
-
-    // // UPDATE THE BOOK
-    // app.put('/api/books/:book_id', function(req, res){
-    //     res.end();
-    // });
-
-    // // DELETE BOOK
-    // app.delete('/api/books/:book_id', function(req, res){
-    //     res.end();
-    // });
-
 }
